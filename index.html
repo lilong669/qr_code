@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>扫码充电 - 艾馨锦苑超级充电站</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dom-to-image@2.6.0/dist/dom-to-image.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -183,6 +185,25 @@
 
         .reset-btn:hover {
             background: #007c8a;
+            transform: translateY(-2px);
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .save-btn:hover {
+            background: #45a049;
             transform: translateY(-2px);
         }
 
@@ -386,7 +407,7 @@
         
         <div class="qr-container">
             <div class="qr-frame">
-                <img src="qr_code.jpg" alt="二维码" class="qr-image" id="qrImage">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzQ4IiBoZWlnaHQ9IjM0OCIgdmlld0JveD0iMCAwIDM0OCAzNDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzNDgiIGhlaWdodD0iMzQ4IiBmaWxsPSIjRkZGRkZGIi8+Cjx0ZXh0IHg9IjE3NCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPlFSIENvZGU8L3RleHQ+Cjx0ZXh0IHg9IjE3NCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiPjM0OHgzNDg8L3RleHQ+Cjwvc3ZnPgo=" alt="二维码" class="qr-image" id="qrImage">
             </div>
         </div>
         
@@ -425,6 +446,8 @@
         </div>
         
         <button class="reset-btn" id="resetBtn" onclick="resetToDefault()">重置为默认</button>
+        
+        <button class="save-btn" id="saveBtn" onclick="saveAsImage()">保存为图片</button>
     </div>
 
     <script>
@@ -438,6 +461,7 @@
                 subTitleLabel: '小标题',
                 qrImageLabel: '二维码图片（1:1）',
                 resetBtn: '重置为默认',
+                saveBtn: '保存为图片',
                 mainTitlePlaceholder: '请输入大标题',
                 subTitlePlaceholder: '请输入小标题',
                 imagePreviewText: '选择图片后显示预览',
@@ -453,6 +477,7 @@
                 subTitleLabel: 'Sub Title',
                 qrImageLabel: 'QR Code Image (1:1)',
                 resetBtn: 'Reset to Default',
+                saveBtn: 'Save as Image',
                 mainTitlePlaceholder: 'Enter main title',
                 subTitlePlaceholder: 'Enter sub title',
                 imagePreviewText: 'Select image to preview',
@@ -510,6 +535,7 @@
             document.getElementById('subTitleLabel').textContent = i18n[lang].subTitleLabel;
             document.getElementById('qrImageLabel').textContent = i18n[lang].qrImageLabel;
             document.getElementById('resetBtn').textContent = i18n[lang].resetBtn;
+            document.getElementById('saveBtn').textContent = i18n[lang].saveBtn;
 
             // 更新输入框占位符
             mainTitleInput.placeholder = i18n[lang].mainTitlePlaceholder;
@@ -567,8 +593,26 @@
                 };
                 reader.readAsDataURL(file);
                 
-                // 更新海报中的图片
-                qrImage.src = URL.createObjectURL(file);
+                // 预处理图片以避免跨域问题
+                const img = new Image();
+                img.onload = function() {
+                    // 创建canvas来重新绘制图片
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    // 绘制图片到canvas
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // 将canvas转换为base64数据
+                    const dataUrl = canvas.toDataURL('image/png');
+                    qrImage.src = dataUrl;
+                    
+                    // 存储base64数据
+                    qrImage.dataset.base64 = dataUrl;
+                };
+                img.src = URL.createObjectURL(file);
             }
         });
 
@@ -584,6 +628,160 @@
             qrImage.src = defaultValues[lang].qrImage;
             
             imagePreview.innerHTML = i18n[lang].imagePreviewText;
+        }
+
+        // 保存为图片
+        function saveAsImage() {
+            // 显示加载提示
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = currentLang === 'zh' ? '生成中...' : 'Generating...';
+            saveBtn.disabled = true;
+
+            // 预处理所有图片为base64
+            preprocessImages().then(() => {
+                // 获取海报元素
+                const poster = document.querySelector('.poster');
+                
+                // 首先尝试使用html2canvas
+                trySaveWithHtml2Canvas(poster, saveBtn, originalText);
+            }).catch(error => {
+                console.error('图片预处理失败:', error);
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                showMessage(currentLang === 'zh' ? '图片处理失败，请重试' : 'Image processing failed, please try again');
+            });
+        }
+
+        // 预处理所有图片为base64
+        function preprocessImages() {
+            return new Promise((resolve) => {
+                // 现在默认图片已经是base64，直接解析
+                resolve();
+            });
+        }
+
+        // 使用html2canvas保存
+        function trySaveWithHtml2Canvas(poster, saveBtn, originalText) {
+            const options = {
+                scale: 2, // 提高图片质量
+                useCORS: true, // 启用跨域支持（因为现在使用base64）
+                allowTaint: true, // 允许污染画布（因为base64图片是安全的）
+                backgroundColor: '#f0f8ff', // 设置背景色
+                width: poster.offsetWidth,
+                height: poster.offsetHeight,
+                scrollX: 0,
+                scrollY: 0,
+                logging: false, // 禁用日志
+                imageTimeout: 0, // 禁用图片超时
+                removeContainer: true, // 移除临时容器
+                foreignObjectRendering: false // 禁用外部对象渲染
+            };
+
+            html2canvas(poster, options).then(canvas => {
+                try {
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    
+                    // 触发下载
+                    link.click();
+                    
+                    // 恢复按钮状态
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                    
+                    // 显示成功提示
+                    showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
+                } catch (error) {
+                    console.error('html2canvas导出失败:', error);
+                    // 尝试使用dom-to-image作为备用方案
+                    trySaveWithDomToImage(poster, saveBtn, originalText);
+                }
+            }).catch(error => {
+                console.error('html2canvas生成失败:', error);
+                // 尝试使用dom-to-image作为备用方案
+                trySaveWithDomToImage(poster, saveBtn, originalText);
+            });
+        }
+
+        // 使用dom-to-image保存（备用方案）
+        function trySaveWithDomToImage(poster, saveBtn, originalText) {
+            if (typeof domtoimage !== 'undefined') {
+                domtoimage.toPng(poster, {
+                    quality: 1.0,
+                    bgcolor: '#f0f8ff',
+                    width: poster.offsetWidth * 2,
+                    height: poster.offsetHeight * 2
+                }).then(function(dataUrl) {
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
+                    link.href = dataUrl;
+                    
+                    // 触发下载
+                    link.click();
+                    
+                    // 恢复按钮状态
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                    
+                    // 显示成功提示
+                    showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
+                }).catch(function(error) {
+                    console.error('dom-to-image也失败了:', error);
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                    showMessage(currentLang === 'zh' ? '保存失败，请重试' : 'Save failed, please try again');
+                });
+            } else {
+                // 如果两个库都不可用，显示错误信息
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                showMessage(currentLang === 'zh' ? '保存功能不可用，请检查网络连接' : 'Save function unavailable, please check network connection');
+            }
+        }
+
+        // 显示消息提示
+        function showMessage(message) {
+            // 创建消息元素
+            const messageEl = document.createElement('div');
+            messageEl.textContent = message;
+            messageEl.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4caf50;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(messageEl);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                messageEl.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(messageEl);
+                }, 300);
+            }, 3000);
         }
 
         // 页面加载完成后初始化
