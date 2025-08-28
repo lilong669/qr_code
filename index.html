@@ -13,9 +13,18 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-color: #0097a7;
+            --background-color: #f0f8ff;
+            --wave1-color: #e3f2fd;
+            --wave2-color: #90caf9;
+            --wave3-color: #4fc3f7;
+            --wave4-color: #00acc1;
+        }
+
         body {
             font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
-            background: #f0f8ff;
+            background: var(--background-color);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -27,7 +36,7 @@
         .poster {
             width: 800px;
             height: 1132px;
-            background: #f0f8ff;
+            background: var(--background-color);
             border-radius: 0;
             box-shadow: 0 40px 120px rgba(0, 0, 0, 0.1);
             position: relative;
@@ -48,9 +57,9 @@
 
         .lang-btn {
             padding: 8px 16px;
-            border: 2px solid #0097a7;
+            border: 2px solid var(--primary-color);
             background: transparent;
-            color: #0097a7;
+            color: var(--primary-color);
             border-radius: 20px;
             cursor: pointer;
             font-size: 14px;
@@ -60,12 +69,12 @@
         }
 
         .lang-btn.active {
-            background: #0097a7;
+            background: var(--primary-color);
             color: white;
         }
 
         .lang-btn:hover {
-            background: #0097a7;
+            background: var(--primary-color);
             color: white;
             transform: translateY(-2px);
         }
@@ -82,7 +91,7 @@
         }
 
         .control-panel h3 {
-            color: #0097a7;
+            color: var(--primary-color);
             font-size: 24px;
             margin-bottom: 25px;
             text-align: center;
@@ -113,7 +122,7 @@
 
         .input-group input:focus {
             outline: none;
-            border-color: #0097a7;
+            border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(0, 151, 167, 0.1);
         }
 
@@ -134,13 +143,13 @@
         .file-input-label {
             display: block;
             padding: 12px 16px;
-            border: 2px dashed #0097a7;
+            border: 2px dashed var(--primary-color);
             background: #f8f9fa;
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #0097a7;
+            color: var(--primary-color);
             font-weight: 500;
         }
 
@@ -172,7 +181,7 @@
         .reset-btn {
             width: 100%;
             padding: 12px;
-            background: #0097a7;
+            background: var(--primary-color);
             color: white;
             border: none;
             border-radius: 10px;
@@ -222,7 +231,7 @@
             left: -12%;
             width: 124%;
             height: 360px;
-            background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+            background: linear-gradient(45deg, var(--wave1-color), #bbdefb);
             border-radius: 50% 50% 0 0;
             transform: rotate(-6deg);
         }
@@ -233,7 +242,7 @@
             left: -8%;
             width: 116%;
             height: 320px;
-            background: linear-gradient(45deg, #90caf9, #64b5f6);
+            background: linear-gradient(45deg, var(--wave2-color), #64b5f6);
             border-radius: 50% 50% 0 0;
             transform: rotate(4deg);
         }
@@ -244,7 +253,7 @@
             left: -18%;
             width: 136%;
             height: 300px;
-            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            background: linear-gradient(45deg, var(--wave3-color), #29b6f6);
             border-radius: 50% 50% 0 0;
             transform: rotate(-3deg);
         }
@@ -255,7 +264,7 @@
             left: -10%;
             width: 120%;
             height: 400px;
-            background: linear-gradient(45deg, #00acc1, #70bed3);
+            background: linear-gradient(45deg, var(--wave4-color), #70bed3);
             border-radius: 50% 50% 0 0;
             transform: rotate(5deg);
         }
@@ -263,7 +272,7 @@
         .title {
             font-size: 96px;
             font-weight: 700;
-            color: #0097a7;
+            color: var(--primary-color);
             text-align: center;
             margin-bottom: 80px;
             z-index: 3;
@@ -282,7 +291,7 @@
             width: 400px;
             height: 400px;
             background: #ffffff;
-            border: 6px solid #0097a7;
+            border: 6px solid var(--primary-color);
             border-radius: 40px;
             position: relative;
             display: flex;
@@ -304,7 +313,7 @@
         .description {
             font-size: 36px;
             font-weight: 400;
-            color: #0097a7;
+            color: var(--primary-color);
             text-align: center;
             line-height: 1.4;
             z-index: 3;
@@ -329,7 +338,7 @@
             position: absolute;
             width: 16px;
             height: 16px;
-            background: #0097a7;
+            background: var(--primary-color);
             border-radius: 50%;
             opacity: 0.6;
         }
@@ -342,6 +351,101 @@
         .accent-dots::after {
             top: 40px;
             right: 30px;
+        }
+
+        /* 配色选择器样式 */
+        .color-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .color-section h4 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .color-group {
+            margin-bottom: 15px;
+        }
+
+        .color-group label {
+            display: block;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-input-wrapper input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .color-input-wrapper input[type="color"]:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .color-input-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-input-wrapper input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .color-input-wrapper input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .color-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .reset-colors-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .reset-colors-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-2px);
         }
 
         @media (max-width: 1200px) {
@@ -445,6 +549,61 @@
             </div>
         </div>
         
+        <!-- 配色选择器 -->
+        <div class="color-section">
+            <h4 id="colorSectionTitle">配色方案</h4>
+            
+            <div class="color-group">
+                <label for="primaryColor" id="primaryColorLabel">主色调</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="primaryColor" value="#0097a7">
+                    <span class="color-value" id="primaryColorValue">#0097a7</span>
+                </div>
+            </div>
+            
+            <div class="color-group">
+                <label for="backgroundColor" id="backgroundColorLabel">背景色</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="backgroundColor" value="#f0f8ff">
+                    <span class="color-value" id="backgroundColorValue">#f0f8ff</span>
+                </div>
+            </div>
+            
+            <div class="color-group">
+                <label for="wave1Color" id="wave1ColorLabel">波浪1</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="wave1Color" value="#e3f2fd">
+                    <span class="color-value" id="wave1ColorValue">#e3f2fd</span>
+                </div>
+            </div>
+            
+            <div class="color-group">
+                <label for="wave2Color" id="wave2ColorLabel">波浪2</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="wave2Color" value="#90caf9">
+                    <span class="color-value" id="wave2ColorValue">#90caf9</span>
+                </div>
+            </div>
+            
+            <div class="color-group">
+                <label for="wave3Color" id="wave3ColorLabel">波浪3</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="wave3Color" value="#4fc3f7">
+                    <span class="color-value" id="wave3ColorValue">#4fc3f7</span>
+                </div>
+            </div>
+            
+            <div class="color-group">
+                <label for="wave4Color" id="wave4ColorLabel">波浪4</label>
+                <div class="color-input-wrapper">
+                    <input type="color" id="wave4Color" value="#00acc1">
+                    <span class="color-value" id="wave4ColorValue">#00acc1</span>
+                </div>
+            </div>
+            
+            <button class="reset-colors-btn" id="resetColorsBtn" onclick="resetColors()">重置颜色</button>
+        </div>
+        
         <button class="reset-btn" id="resetBtn" onclick="resetToDefault()">重置为默认</button>
         
         <button class="save-btn" id="saveBtn" onclick="saveAsImage()">保存为图片</button>
@@ -467,7 +626,15 @@
                 imagePreviewText: '选择图片后显示预览',
                 qrCodeAlt: '二维码',
                 fileSelectTitle: '选择图片文件',
-                fileSelectText: '选择文件'
+                fileSelectText: '选择文件',
+                colorSectionTitle: '配色方案',
+                primaryColorLabel: '主色调',
+                backgroundColorLabel: '背景色',
+                wave1ColorLabel: '波浪1',
+                wave2ColorLabel: '波浪2',
+                wave3ColorLabel: '波浪3',
+                wave4ColorLabel: '波浪4',
+                resetColorsBtn: '重置颜色'
             },
             en: {
                 mainTitle: 'Scan to Charge',
@@ -483,7 +650,15 @@
                 imagePreviewText: 'Select image to preview',
                 qrCodeAlt: 'QR Code',
                 fileSelectTitle: 'Select image file',
-                fileSelectText: 'Choose File'
+                fileSelectText: 'Choose File',
+                colorSectionTitle: 'Color Scheme',
+                primaryColorLabel: 'Primary Color',
+                backgroundColorLabel: 'Background Color',
+                wave1ColorLabel: 'Wave 1',
+                wave2ColorLabel: 'Wave 2',
+                wave3ColorLabel: 'Wave 3',
+                wave4ColorLabel: 'Wave 4',
+                resetColorsBtn: 'Reset Colors'
             }
         };
 
@@ -499,6 +674,24 @@
         const qrImage = document.getElementById('qrImage');
         const imagePreview = document.getElementById('imagePreview');
         const langBtns = document.querySelectorAll('.lang-btn');
+
+        // 颜色选择器元素
+        const primaryColorInput = document.getElementById('primaryColor');
+        const backgroundColorInput = document.getElementById('backgroundColor');
+        const wave1ColorInput = document.getElementById('wave1Color');
+        const wave2ColorInput = document.getElementById('wave2Color');
+        const wave3ColorInput = document.getElementById('wave3Color');
+        const wave4ColorInput = document.getElementById('wave4Color');
+
+        // 默认颜色配置
+        const defaultColors = {
+            primary: '#0097a7',
+            background: '#f0f8ff',
+            wave1: '#e3f2fd',
+            wave2: '#90caf9',
+            wave3: '#4fc3f7',
+            wave4: '#00acc1'
+        };
 
         // 默认值
         const defaultValues = {
@@ -552,6 +745,18 @@
             // 更新文件选择器的文本
             document.getElementById('fileInputText').textContent = i18n[lang].fileSelectText;
             qrImageInput.setAttribute('title', i18n[lang].fileSelectTitle);
+            
+            // 更新配色选择器文本
+            if (document.getElementById('colorSectionTitle')) {
+                document.getElementById('colorSectionTitle').textContent = i18n[lang].colorSectionTitle;
+                document.getElementById('primaryColorLabel').textContent = i18n[lang].primaryColorLabel;
+                document.getElementById('backgroundColorLabel').textContent = i18n[lang].backgroundColorLabel;
+                document.getElementById('wave1ColorLabel').textContent = i18n[lang].wave1ColorLabel;
+                document.getElementById('wave2ColorLabel').textContent = i18n[lang].wave2ColorLabel;
+                document.getElementById('wave3ColorLabel').textContent = i18n[lang].wave3ColorLabel;
+                document.getElementById('wave4ColorLabel').textContent = i18n[lang].wave4ColorLabel;
+                document.getElementById('resetColorsBtn').textContent = i18n[lang].resetColorsBtn;
+            }
             
             // 如果当前输入框为空或者是默认值，则使用新语言的默认值
             if (!mainTitleInput.value || mainTitleInput.value === defaultValues[currentLang === 'zh' ? 'en' : 'zh'].mainTitle) {
@@ -616,6 +821,45 @@
             }
         });
 
+        // 颜色更新函数
+        function updateColors() {
+            const primaryColor = primaryColorInput.value;
+            const backgroundColor = backgroundColorInput.value;
+            const wave1Color = wave1ColorInput.value;
+            const wave2Color = wave2ColorInput.value;
+            const wave3Color = wave3ColorInput.value;
+            const wave4Color = wave4ColorInput.value;
+
+            // 更新CSS变量
+            document.documentElement.style.setProperty('--primary-color', primaryColor);
+            document.documentElement.style.setProperty('--background-color', backgroundColor);
+            document.documentElement.style.setProperty('--wave1-color', wave1Color);
+            document.documentElement.style.setProperty('--wave2-color', wave2Color);
+            document.documentElement.style.setProperty('--wave3-color', wave3Color);
+            document.documentElement.style.setProperty('--wave4-color', wave4Color);
+
+            // 更新颜色值显示
+            if (document.getElementById('primaryColorValue')) {
+                document.getElementById('primaryColorValue').textContent = primaryColor;
+                document.getElementById('backgroundColorValue').textContent = backgroundColor;
+                document.getElementById('wave1ColorValue').textContent = wave1Color;
+                document.getElementById('wave2ColorValue').textContent = wave2Color;
+                document.getElementById('wave3ColorValue').textContent = wave3Color;
+                document.getElementById('wave4ColorValue').textContent = wave4Color;
+            }
+        }
+
+        // 重置颜色
+        function resetColors() {
+            primaryColorInput.value = defaultColors.primary;
+            backgroundColorInput.value = defaultColors.background;
+            wave1ColorInput.value = defaultColors.wave1;
+            wave2ColorInput.value = defaultColors.wave2;
+            wave3ColorInput.value = defaultColors.wave3;
+            wave4ColorInput.value = defaultColors.wave4;
+            updateColors();
+        }
+
         // 重置为默认值
         function resetToDefault() {
             const lang = currentLang;
@@ -628,6 +872,9 @@
             qrImage.src = defaultValues[lang].qrImage;
             
             imagePreview.innerHTML = i18n[lang].imagePreviewText;
+            
+            // 同时重置颜色
+            resetColors();
         }
 
         // 保存为图片
@@ -795,6 +1042,19 @@
             
             // 设置初始文件选择器文本
             document.getElementById('fileInputText').textContent = i18n.zh.fileSelectText;
+            
+            // 添加颜色选择器事件监听器
+            if (primaryColorInput) {
+                primaryColorInput.addEventListener('input', updateColors);
+                backgroundColorInput.addEventListener('input', updateColors);
+                wave1ColorInput.addEventListener('input', updateColors);
+                wave2ColorInput.addEventListener('input', updateColors);
+                wave3ColorInput.addEventListener('input', updateColors);
+                wave4ColorInput.addEventListener('input', updateColors);
+                
+                // 初始化颜色显示
+                updateColors();
+            }
         });
     </script>
 </body>
