@@ -616,18 +616,7 @@
             <button class="lang-btn" data-lang="en">English</button>
         </div>
         
-        <div class="input-group">
-            <label id="fitToggleLabel">
-                <input type="checkbox" id="fitToggle" checked>
-                <span id="fitToggleText">适配窗口预览</span>
-            </label>
-        </div>
-
-        <div class="input-group" id="zoomGroup" style="opacity: 0.6; pointer-events: none;">
-            <label for="zoomRange" id="zoomRangeLabel">缩放</label>
-            <input type="range" id="zoomRange" min="25" max="200" value="100">
-            <div class="color-value" id="zoomValue">100%</div>
-        </div>
+        
         
         <div class="input-group">
             <label for="mainTitleInput" id="mainTitleLabel">大标题</label>
@@ -664,12 +653,11 @@
                 </div>
             </div>
             
-            <button class="reset-colors-btn" id="resetColorsBtn" onclick="resetColors()">重置颜色</button>
+            
         </div>
         
-        <button class="reset-btn" id="resetBtn" onclick="resetToDefault()">重置为默认</button>
         
-        <button class="save-btn" id="saveBtn" onclick="saveAsImage()">保存为图片</button>
+        
     </div>
 
     <div class="floating-toolbar" aria-label="toolbar">
@@ -1010,10 +998,12 @@
         // 保存为图片
         function saveAsImage() {
             // 显示加载提示
-            const saveBtn = document.getElementById('saveBtn');
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = currentLang === 'zh' ? '生成中...' : 'Generating...';
-            saveBtn.disabled = true;
+            const saveBtn = document.getElementById('ftSaveBtn');
+            const originalText = saveBtn ? saveBtn.textContent : '';
+            if (saveBtn) {
+                saveBtn.textContent = currentLang === 'zh' ? '生成中...' : 'Generating...';
+                saveBtn.disabled = true;
+            }
 
             // 预处理所有图片为base64
             preprocessImages().then(() => {
@@ -1025,8 +1015,10 @@
                 });
             }).catch(error => {
                 console.error('图片预处理失败:', error);
-                saveBtn.textContent = originalText;
-                saveBtn.disabled = false;
+                if (saveBtn) {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }
                 showMessage(currentLang === 'zh' ? '图片处理失败，请重试' : 'Image processing failed, please try again');
             });
         }
@@ -1064,8 +1056,10 @@
                         link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
                         link.href = canvas.toDataURL('image/png');
                         link.click();
-                        saveBtn.textContent = originalText;
-                        saveBtn.disabled = false;
+                        if (saveBtn) {
+                            saveBtn.textContent = originalText;
+                            saveBtn.disabled = false;
+                        }
                         showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
                         resolve(true);
                     } catch (error) {
@@ -1094,20 +1088,26 @@
                         link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
                         link.href = dataUrl;
                         link.click();
-                        saveBtn.textContent = originalText;
-                        saveBtn.disabled = false;
+                        if (saveBtn) {
+                            saveBtn.textContent = originalText;
+                            saveBtn.disabled = false;
+                        }
                         showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
                         resolve(true);
                     }).catch(function(error) {
                         console.error('dom-to-image也失败了:', error);
-                        saveBtn.textContent = originalText;
-                        saveBtn.disabled = false;
+                        if (saveBtn) {
+                            saveBtn.textContent = originalText;
+                            saveBtn.disabled = false;
+                        }
                         showMessage(currentLang === 'zh' ? '保存失败，请重试' : 'Save failed, please try again');
                         reject(error);
                     });
                 } else {
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
+                    if (saveBtn) {
+                        saveBtn.textContent = originalText;
+                        saveBtn.disabled = false;
+                    }
                     showMessage(currentLang === 'zh' ? '保存功能不可用，请检查网络连接' : 'Save function unavailable, please check network connection');
                     reject(new Error('dom-to-image unavailable'));
                 }
@@ -1276,32 +1276,7 @@
                 }
             });
 
-            // 事件：切换适配
-            if (fitToggleEl) {
-                fitToggleEl.addEventListener('change', () => {
-                    const isFit = fitToggleEl.checked;
-                    updateFitModeUI(isFit);
-                    if (isFit) {
-                        applyScale(computeFitScale());
-                    } else {
-                        const manualScale = lastManualScale || 1;
-                        if (zoomRangeEl) zoomRangeEl.value = String(Math.round(manualScale * 100));
-                        applyScale(manualScale);
-                    }
-                });
-            }
-
-            // 事件：手动缩放
-            if (zoomRangeEl) {
-                zoomRangeEl.addEventListener('input', () => {
-                    const percent = parseInt(zoomRangeEl.value, 10) || 100;
-                    const scale = Math.max(percent, 1) / 100;
-                    lastManualScale = scale;
-                    if (fitToggleEl && !fitToggleEl.checked) {
-                        applyScale(scale);
-                    }
-                });
-            }
+            // 旧控制项已移除（适配与缩放改由悬浮工具栏控制）
         }
 
         function bindFloatingToolbar() {
@@ -1316,20 +1291,18 @@
                 ftFitBtn.classList.toggle('toggled', willFit);
             });
             if (ftZoomInBtn) ftZoomInBtn.addEventListener('click', () => {
-                if (!zoomRangeEl) return;
-                const val = Math.min(200, (parseInt(zoomRangeEl.value, 10) || 100) + 10);
-                zoomRangeEl.value = String(val);
-                lastManualScale = val / 100;
-                if (fitToggleEl && !fitToggleEl.checked) applyScale(lastManualScale);
+                lastManualScale = Math.min(2, (lastManualScale || 1) + 0.1);
+                if (fitToggleEl) fitToggleEl.checked = false;
+                applyScale(lastManualScale);
+                ftFitBtn && ftFitBtn.classList.remove('toggled');
             });
             if (ftZoomOutBtn) ftZoomOutBtn.addEventListener('click', () => {
-                if (!zoomRangeEl) return;
-                const val = Math.max(25, (parseInt(zoomRangeEl.value, 10) || 100) - 10);
-                zoomRangeEl.value = String(val);
-                lastManualScale = val / 100;
-                if (fitToggleEl && !fitToggleEl.checked) applyScale(lastManualScale);
+                lastManualScale = Math.max(0.25, (lastManualScale || 1) - 0.1);
+                if (fitToggleEl) fitToggleEl.checked = false;
+                applyScale(lastManualScale);
+                ftFitBtn && ftFitBtn.classList.remove('toggled');
             });
-            if (ftFitBtn && fitToggleEl) ftFitBtn.classList.toggle('toggled', fitToggleEl.checked);
+            if (ftFitBtn) ftFitBtn.classList.toggle('toggled', !fitToggleEl || fitToggleEl.checked);
             if (ftZoomDisplay) ftZoomDisplay.textContent = `${Math.round(currentScale * 100)}%`;
         }
 
