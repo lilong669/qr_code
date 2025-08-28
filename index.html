@@ -36,6 +36,7 @@
             align-items: flex-start;
             padding: 40px;
             gap: 40px;
+            overflow: hidden;
         }
 
         .poster {
@@ -51,6 +52,14 @@
             justify-content: space-between;
             padding: 100px 80px;
             overflow: hidden;
+            will-change: transform;
+        }
+
+        .poster-scale-wrapper {
+            position: relative;
+            width: 800px;
+            height: 1132px;
+            transform: translateZ(0);
         }
 
         .language-switcher {
@@ -93,6 +102,8 @@
             height: fit-content;
             position: sticky;
             top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow: auto;
         }
 
         .control-panel h3 {
@@ -502,7 +513,8 @@
     </style>
 </head>
 <body>
-    <div class="poster">
+    <div class="poster-scale-wrapper">
+        <div class="poster">
         <div class="wave-background">
             <div class="wave-1"></div>
             <div class="wave-2"></div>
@@ -521,6 +533,7 @@
         </div>
         
         <p class="description" id="subTitle">XXXX超级充电站 A001</p>
+        </div>
     </div>
 
     <div class="control-panel">
@@ -529,6 +542,19 @@
         <div class="language-switcher">
             <button class="lang-btn active" data-lang="zh">中文</button>
             <button class="lang-btn" data-lang="en">English</button>
+        </div>
+        
+        <div class="input-group">
+            <label id="fitToggleLabel">
+                <input type="checkbox" id="fitToggle" checked>
+                <span id="fitToggleText">适配窗口预览</span>
+            </label>
+        </div>
+
+        <div class="input-group" id="zoomGroup" style="opacity: 0.6; pointer-events: none;">
+            <label for="zoomRange" id="zoomRangeLabel">缩放</label>
+            <input type="range" id="zoomRange" min="25" max="200" value="100">
+            <div class="color-value" id="zoomValue">100%</div>
         </div>
         
         <div class="input-group">
@@ -599,7 +625,9 @@
                 wave2ColorLabel: '波浪2',
                 wave3ColorLabel: '波浪3',
                 wave4ColorLabel: '波浪4',
-                resetColorsBtn: '重置颜色'
+                resetColorsBtn: '重置颜色',
+                fitToggleText: '适配窗口预览',
+                zoomRangeLabel: '缩放'
             },
             en: {
                 mainTitle: 'Scan to Charge',
@@ -623,7 +651,9 @@
                 wave2ColorLabel: 'Wave 2',
                 wave3ColorLabel: 'Wave 3',
                 wave4ColorLabel: 'Wave 4',
-                resetColorsBtn: 'Reset Colors'
+                resetColorsBtn: 'Reset Colors',
+                fitToggleText: 'Fit to Screen',
+                zoomRangeLabel: 'Zoom'
             }
         };
 
@@ -639,6 +669,12 @@
         const qrImage = document.getElementById('qrImage');
         const imagePreview = document.getElementById('imagePreview');
         const langBtns = document.querySelectorAll('.lang-btn');
+        const posterEl = document.querySelector('.poster');
+        const posterWrapperEl = document.querySelector('.poster-scale-wrapper');
+        const controlPanelEl = document.querySelector('.control-panel');
+        const fitToggleEl = document.getElementById('fitToggle');
+        const zoomRangeEl = document.getElementById('zoomRange');
+        const zoomValueEl = document.getElementById('zoomValue');
 
         // 颜色选择器元素
         const primaryColorInput = document.getElementById('primaryColor');
@@ -711,6 +747,11 @@
                 const elReset = document.getElementById('resetColorsBtn');
                 if (elReset) elReset.textContent = i18n[lang].resetColorsBtn;
             }
+            // 更新缩放与适配文案
+            const fitTextEl = document.getElementById('fitToggleText');
+            if (fitTextEl) fitTextEl.textContent = i18n[lang].fitToggleText;
+            const zoomLabelEl = document.getElementById('zoomRangeLabel');
+            if (zoomLabelEl) zoomLabelEl.textContent = i18n[lang].zoomRangeLabel;
             
             // 如果当前输入框为空或者是默认值，则使用新语言的默认值
             if (!mainTitleInput.value || mainTitleInput.value === defaultValues[currentLang === 'zh' ? 'en' : 'zh'].mainTitle) {
@@ -874,11 +915,8 @@
 
             // 预处理所有图片为base64
             preprocessImages().then(() => {
-                // 获取海报元素
                 const poster = document.querySelector('.poster');
-                
-                // 首先尝试使用html2canvas
-                trySaveWithHtml2Canvas(poster, saveBtn, originalText);
+                return withTemporaryScaleAsync(() => trySaveWithHtml2Canvas(poster, saveBtn, originalText));
             }).catch(error => {
                 console.error('图片预处理失败:', error);
                 saveBtn.textContent = originalText;
@@ -897,86 +935,77 @@
 
         // 使用html2canvas保存
         function trySaveWithHtml2Canvas(poster, saveBtn, originalText) {
-            const bg = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
-            const options = {
-                scale: 2, // 提高图片质量
-                useCORS: true, // 启用跨域支持（因为现在使用base64）
-                allowTaint: true, // 允许污染画布（因为base64图片是安全的）
-                backgroundColor: bg, // 设置背景色
-                width: poster.offsetWidth,
-                height: poster.offsetHeight,
-                scrollX: 0,
-                scrollY: 0,
-                logging: false, // 禁用日志
-                imageTimeout: 0, // 禁用图片超时
-                removeContainer: true, // 移除临时容器
-                foreignObjectRendering: false // 禁用外部对象渲染
-            };
+            return new Promise((resolve) => {
+                const bg = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
+                const options = {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: bg,
+                    width: poster.offsetWidth,
+                    height: poster.offsetHeight,
+                    scrollX: 0,
+                    scrollY: 0,
+                    logging: false,
+                    imageTimeout: 0,
+                    removeContainer: true,
+                    foreignObjectRendering: false
+                };
 
-            html2canvas(poster, options).then(canvas => {
-                try {
-                    // 创建下载链接
-                    const link = document.createElement('a');
-                    link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    
-                    // 触发下载
-                    link.click();
-                    
-                    // 恢复按钮状态
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                    
-                    // 显示成功提示
-                    showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
-                } catch (error) {
-                    console.error('html2canvas导出失败:', error);
-                    // 尝试使用dom-to-image作为备用方案
-                    trySaveWithDomToImage(poster, saveBtn, originalText);
-                }
-            }).catch(error => {
-                console.error('html2canvas生成失败:', error);
-                // 尝试使用dom-to-image作为备用方案
-                trySaveWithDomToImage(poster, saveBtn, originalText);
+                html2canvas(poster, options).then(canvas => {
+                    try {
+                        const link = document.createElement('a');
+                        link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        saveBtn.textContent = originalText;
+                        saveBtn.disabled = false;
+                        showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
+                        resolve(true);
+                    } catch (error) {
+                        console.error('html2canvas导出失败:', error);
+                        trySaveWithDomToImage(poster, saveBtn, originalText).then(() => resolve(true)).catch(() => resolve(false));
+                    }
+                }).catch(error => {
+                    console.error('html2canvas生成失败:', error);
+                    trySaveWithDomToImage(poster, saveBtn, originalText).then(() => resolve(true)).catch(() => resolve(false));
+                });
             });
         }
 
         // 使用dom-to-image保存（备用方案）
         function trySaveWithDomToImage(poster, saveBtn, originalText) {
-            if (typeof domtoimage !== 'undefined') {
-                const bg2 = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
-                domtoimage.toPng(poster, {
-                    quality: 1.0,
-                    bgcolor: bg2,
-                    width: poster.offsetWidth * 2,
-                    height: poster.offsetHeight * 2
-                }).then(function(dataUrl) {
-                    // 创建下载链接
-                    const link = document.createElement('a');
-                    link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
-                    link.href = dataUrl;
-                    
-                    // 触发下载
-                    link.click();
-                    
-                    // 恢复按钮状态
+            return new Promise((resolve, reject) => {
+                if (typeof domtoimage !== 'undefined') {
+                    const bg2 = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
+                    domtoimage.toPng(poster, {
+                        quality: 1.0,
+                        bgcolor: bg2,
+                        width: poster.offsetWidth * 2,
+                        height: poster.offsetHeight * 2
+                    }).then(function(dataUrl) {
+                        const link = document.createElement('a');
+                        link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
+                        link.href = dataUrl;
+                        link.click();
+                        saveBtn.textContent = originalText;
+                        saveBtn.disabled = false;
+                        showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
+                        resolve(true);
+                    }).catch(function(error) {
+                        console.error('dom-to-image也失败了:', error);
+                        saveBtn.textContent = originalText;
+                        saveBtn.disabled = false;
+                        showMessage(currentLang === 'zh' ? '保存失败，请重试' : 'Save failed, please try again');
+                        reject(error);
+                    });
+                } else {
                     saveBtn.textContent = originalText;
                     saveBtn.disabled = false;
-                    
-                    // 显示成功提示
-                    showMessage(currentLang === 'zh' ? '图片保存成功！' : 'Image saved successfully!');
-                }).catch(function(error) {
-                    console.error('dom-to-image也失败了:', error);
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                    showMessage(currentLang === 'zh' ? '保存失败，请重试' : 'Save failed, please try again');
-                });
-            } else {
-                // 如果两个库都不可用，显示错误信息
-                saveBtn.textContent = originalText;
-                saveBtn.disabled = false;
-                showMessage(currentLang === 'zh' ? '保存功能不可用，请检查网络连接' : 'Save function unavailable, please check network connection');
-            }
+                    showMessage(currentLang === 'zh' ? '保存功能不可用，请检查网络连接' : 'Save function unavailable, please check network connection');
+                    reject(new Error('dom-to-image unavailable'));
+                }
+            });
         }
 
         // 显示消息提示
@@ -1038,7 +1067,140 @@
                 // 初始化颜色显示
                 updateColors();
             }
+
+            // 初始化缩放逻辑
+            initPreviewScaling();
         });
+
+        // ============ 预览缩放与适配窗口逻辑 ============
+        let currentScale = 1;
+        let lastManualScale = 1;
+
+        function applyScale(scale) {
+            currentScale = scale;
+            if (posterEl && posterWrapperEl) {
+                posterEl.style.transformOrigin = 'top left';
+                posterEl.style.transform = `scale(${scale})`;
+                posterWrapperEl.style.width = `${Math.round(posterEl.offsetWidth * scale)}px`;
+                posterWrapperEl.style.height = `${Math.round(posterEl.offsetHeight * scale)}px`;
+            }
+            if (zoomValueEl) {
+                zoomValueEl.textContent = `${Math.round(scale * 100)}%`;
+            }
+        }
+
+        function computeFitScale() {
+            if (!posterEl) return 1;
+            const bodyStyles = getComputedStyle(document.body);
+            const isColumn = bodyStyles.flexDirection === 'column';
+            const gap = parseInt(bodyStyles.gap || '0', 10) || 0;
+            const paddingLeft = parseInt(bodyStyles.paddingLeft || '0', 10) || 0;
+            const paddingRight = parseInt(bodyStyles.paddingRight || '0', 10) || 0;
+            const paddingTop = parseInt(bodyStyles.paddingTop || '0', 10) || 0;
+            const paddingBottom = parseInt(bodyStyles.paddingBottom || '0', 10) || 0;
+
+            const posterWidth = posterEl.offsetWidth;
+            const posterHeight = posterEl.offsetHeight;
+
+            let availWidth;
+            let availHeight;
+
+            if (!isColumn) {
+                const controlWidth = controlPanelEl ? controlPanelEl.offsetWidth : 0;
+                availWidth = window.innerWidth - paddingLeft - paddingRight - controlWidth - gap;
+                availHeight = window.innerHeight - paddingTop - paddingBottom;
+            } else {
+                const controlHeight = controlPanelEl ? controlPanelEl.offsetHeight : 0;
+                availWidth = window.innerWidth - paddingLeft - paddingRight;
+                availHeight = window.innerHeight - paddingTop - paddingBottom - controlHeight - gap;
+            }
+
+            const scaleW = availWidth / posterWidth;
+            const scaleH = availHeight / posterHeight;
+            const scale = Math.min(scaleW, scaleH, 1);
+            return isFinite(scale) && scale > 0 ? scale : 1;
+        }
+
+        function updateFitModeUI(isFit) {
+            const zoomGroup = document.getElementById('zoomGroup');
+            if (!zoomGroup) return;
+            if (isFit) {
+                zoomGroup.style.opacity = '0.6';
+                zoomGroup.style.pointerEvents = 'none';
+            } else {
+                zoomGroup.style.opacity = '1';
+                zoomGroup.style.pointerEvents = 'auto';
+            }
+        }
+
+        function initPreviewScaling() {
+            if (!posterEl) return;
+            // 初始以适配窗口显示
+            const fitOn = true;
+            if (fitToggleEl) fitToggleEl.checked = fitOn;
+            updateFitModeUI(fitOn);
+            applyScale(computeFitScale());
+
+            // 事件：窗口变化时重新计算
+            window.addEventListener('resize', () => {
+                if (fitToggleEl && fitToggleEl.checked) {
+                    applyScale(computeFitScale());
+                }
+            });
+
+            // 事件：切换适配
+            if (fitToggleEl) {
+                fitToggleEl.addEventListener('change', () => {
+                    const isFit = fitToggleEl.checked;
+                    updateFitModeUI(isFit);
+                    if (isFit) {
+                        applyScale(computeFitScale());
+                    } else {
+                        const manualScale = lastManualScale || 1;
+                        if (zoomRangeEl) zoomRangeEl.value = String(Math.round(manualScale * 100));
+                        applyScale(manualScale);
+                    }
+                });
+            }
+
+            // 事件：手动缩放
+            if (zoomRangeEl) {
+                zoomRangeEl.addEventListener('input', () => {
+                    const percent = parseInt(zoomRangeEl.value, 10) || 100;
+                    const scale = Math.max(percent, 1) / 100;
+                    lastManualScale = scale;
+                    if (fitToggleEl && !fitToggleEl.checked) {
+                        applyScale(scale);
+                    }
+                });
+            }
+        }
+
+        // 导出前临时还原缩放，导出后恢复
+        function withTemporaryScaleAsync(fn) {
+            if (!posterEl || !posterWrapperEl) return fn();
+            const prevTransform = posterEl.style.transform;
+            const prevWidth = posterWrapperEl.style.width;
+            const prevHeight = posterWrapperEl.style.height;
+            posterEl.style.transform = 'scale(1)';
+            posterWrapperEl.style.width = `${posterEl.offsetWidth}px`;
+            posterWrapperEl.style.height = `${posterEl.offsetHeight}px`;
+            const result = fn();
+            if (result && typeof result.then === 'function') {
+                return result.finally(() => {
+                    posterEl.style.transform = prevTransform;
+                    posterWrapperEl.style.width = prevWidth;
+                    posterWrapperEl.style.height = prevHeight;
+                });
+            }
+            try {
+                return result;
+            } finally {
+                posterEl.style.transform = prevTransform;
+                posterWrapperEl.style.width = prevWidth;
+                posterWrapperEl.style.height = prevHeight;
+            }
+        }
     </script>
 </body>
 </html>
