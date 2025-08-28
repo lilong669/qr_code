@@ -802,8 +802,7 @@
             document.getElementById('mainTitleLabel').textContent = i18n[lang].mainTitleLabel;
             document.getElementById('subTitleLabel').textContent = i18n[lang].subTitleLabel;
             document.getElementById('qrImageLabel').textContent = i18n[lang].qrImageLabel;
-            document.getElementById('resetBtn').textContent = i18n[lang].resetBtn;
-            document.getElementById('saveBtn').textContent = i18n[lang].saveBtn;
+            // 旧控制面板按钮已移除：对应文案在悬浮工具栏中更新
 
             // 更新输入框占位符
             mainTitleInput.placeholder = i18n[lang].mainTitlePlaceholder;
@@ -1200,6 +1199,7 @@
         // ============ 预览缩放与适配窗口逻辑 ============
         let currentScale = 1;
         let lastManualScale = 1;
+        let isFitMode = true;
 
         function applyScale(scale) {
             currentScale = scale;
@@ -1264,14 +1264,14 @@
         function initPreviewScaling() {
             if (!posterEl) return;
             // 初始以适配窗口显示
-            const fitOn = true;
-            if (fitToggleEl) fitToggleEl.checked = fitOn;
-            updateFitModeUI(fitOn);
+            isFitMode = true;
+            if (fitToggleEl) fitToggleEl.checked = true;
+            updateFitModeUI(true);
             applyScale(computeFitScale());
 
             // 事件：窗口变化时重新计算
             window.addEventListener('resize', () => {
-                if (fitToggleEl && fitToggleEl.checked) {
+                if (isFitMode) {
                     applyScale(computeFitScale());
                 }
             });
@@ -1283,26 +1283,28 @@
             if (ftSaveBtn) ftSaveBtn.addEventListener('click', () => saveAsImage());
             if (ftResetBtn) ftResetBtn.addEventListener('click', () => resetToDefault());
             if (ftFitBtn) ftFitBtn.addEventListener('click', () => {
-                if (!fitToggleEl) return;
-                const willFit = !fitToggleEl.checked;
-                fitToggleEl.checked = willFit;
-                const event = new Event('change');
-                fitToggleEl.dispatchEvent(event);
-                ftFitBtn.classList.toggle('toggled', willFit);
+                isFitMode = !isFitMode;
+                updateFitModeUI(isFitMode);
+                if (isFitMode) {
+                    applyScale(computeFitScale());
+                } else {
+                    applyScale(lastManualScale || 1);
+                }
+                ftFitBtn.classList.toggle('toggled', isFitMode);
             });
             if (ftZoomInBtn) ftZoomInBtn.addEventListener('click', () => {
+                isFitMode = false;
                 lastManualScale = Math.min(2, (lastManualScale || 1) + 0.1);
-                if (fitToggleEl) fitToggleEl.checked = false;
                 applyScale(lastManualScale);
                 ftFitBtn && ftFitBtn.classList.remove('toggled');
             });
             if (ftZoomOutBtn) ftZoomOutBtn.addEventListener('click', () => {
+                isFitMode = false;
                 lastManualScale = Math.max(0.25, (lastManualScale || 1) - 0.1);
-                if (fitToggleEl) fitToggleEl.checked = false;
                 applyScale(lastManualScale);
                 ftFitBtn && ftFitBtn.classList.remove('toggled');
             });
-            if (ftFitBtn) ftFitBtn.classList.toggle('toggled', !fitToggleEl || fitToggleEl.checked);
+            if (ftFitBtn) ftFitBtn.classList.toggle('toggled', isFitMode);
             if (ftZoomDisplay) ftZoomDisplay.textContent = `${Math.round(currentScale * 100)}%`;
         }
 
