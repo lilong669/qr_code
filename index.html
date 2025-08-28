@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫码充电 - 艾馨锦苑超级充电站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f8ff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px;
+            gap: 40px;
+        }
+
+        .poster {
+            width: 800px;
+            height: 1132px;
+            background: #f0f8ff;
+            border-radius: 0;
+            box-shadow: 0 40px 120px rgba(0, 0, 0, 0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 100px 80px;
+            overflow: hidden;
+        }
+
+        .control-panel {
+            width: 300px;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .control-panel h3 {
+            color: #0097a7;
+            font-size: 24px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #0097a7;
+            box-shadow: 0 0 0 3px rgba(0, 151, 167, 0.1);
+        }
+
+        .input-group input[type="file"] {
+            padding: 8px;
+            border: 2px dashed #0097a7;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .input-group input[type="file"]:hover {
+            background: #e3f2fd;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .preview-image img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0097a7;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .reset-btn:hover {
+            background: #007c8a;
+            transform: translateY(-2px);
+        }
+
+        .wave-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .wave-1 {
+            position: absolute;
+            top: 35%;
+            left: -12%;
+            width: 124%;
+            height: 360px;
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+            border-radius: 50% 50% 0 0;
+            transform: rotate(-6deg);
+        }
+
+        .wave-2 {
+            position: absolute;
+            top: 48%;
+            left: -8%;
+            width: 116%;
+            height: 320px;
+            background: linear-gradient(45deg, #90caf9, #64b5f6);
+            border-radius: 50% 50% 0 0;
+            transform: rotate(4deg);
+        }
+
+        .wave-3 {
+            position: absolute;
+            top: 62%;
+            left: -18%;
+            width: 136%;
+            height: 300px;
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            border-radius: 50% 50% 0 0;
+            transform: rotate(-3deg);
+        }
+
+        .wave-4 {
+            position: absolute;
+            top: 75%;
+            left: -10%;
+            width: 120%;
+            height: 400px;
+            background: linear-gradient(45deg, #00acc1, #70bed3);
+            border-radius: 50% 50% 0 0;
+            transform: rotate(5deg);
+        }
+
+        .title {
+            font-size: 96px;
+            font-weight: 700;
+            color: #0097a7;
+            text-align: center;
+            margin-bottom: 80px;
+            z-index: 3;
+            position: relative;
+            text-shadow: 0 4px 20px rgba(0, 151, 167, 0.2);
+            letter-spacing: 4px;
+        }
+
+        .qr-container {
+            position: relative;
+            z-index: 3;
+            margin-bottom: 80px;
+        }
+
+        .qr-frame {
+            width: 400px;
+            height: 400px;
+            background: #ffffff;
+            border: 6px solid #0097a7;
+            border-radius: 40px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 20px 60px rgba(0, 151, 167, 0.3),
+                inset 0 0 40px rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+        }
+
+        .qr-image {
+            width: 348px;
+            height: 348px;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .description {
+            font-size: 36px;
+            font-weight: 400;
+            color: #0097a7;
+            text-align: center;
+            line-height: 1.4;
+            z-index: 3;
+            position: relative;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px 50px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 151, 167, 0.2);
+        }
+
+        .accent-dots {
+            position: absolute;
+            top: 60px;
+            right: 60px;
+            z-index: 2;
+        }
+
+        .accent-dots::before,
+        .accent-dots::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #0097a7;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        .accent-dots::before {
+            top: 0;
+            right: 0;
+        }
+
+        .accent-dots::after {
+            top: 40px;
+            right: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .control-panel {
+                width: 100%;
+                max-width: 500px;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .poster {
+                width: 640px;
+                height: 906px;
+                padding: 80px 60px;
+            }
+            
+            .title {
+                font-size: 76px;
+                margin-bottom: 60px;
+            }
+            
+            .qr-frame {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .qr-image {
+                width: 256px;
+                height: 256px;
+            }
+            
+            .description {
+                font-size: 28px;
+                padding: 24px 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="poster">
+        <div class="wave-background">
+            <div class="wave-1"></div>
+            <div class="wave-2"></div>
+            <div class="wave-3"></div>
+            <div class="wave-4"></div>
+        </div>
+        
+        <div class="accent-dots"></div>
+        
+        <h1 class="title" id="mainTitle">扫码充电</h1>
+        
+        <div class="qr-container">
+            <div class="qr-frame">
+                <img src="qr_code.jpg" alt="二维码" class="qr-image" id="qrImage">
+            </div>
+        </div>
+        
+        <p class="description" id="subTitle">艾馨锦苑超级充电站 D122</p>
+    </div>
+
+    <div class="control-panel">
+        <h3>控制面板</h3>
+        
+        <div class="input-group">
+            <label for="mainTitleInput">大标题</label>
+            <input type="text" id="mainTitleInput" value="扫码充电" placeholder="请输入大标题">
+        </div>
+        
+        <div class="input-group">
+            <label for="subTitleInput">小标题</label>
+            <input type="text" id="subTitleInput" value="XXXX超级充电站 A001" placeholder="请输入小标题">
+        </div>
+        
+        <div class="input-group">
+            <label for="qrImageInput">二维码图片（1:1）</label>
+            <input type="file" id="qrImageInput" accept="image/*">
+            <div class="preview-image" id="imagePreview">
+                选择图片后显示预览
+            </div>
+        </div>
+        
+        <button class="reset-btn" onclick="resetToDefault()">重置为默认</button>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const mainTitleInput = document.getElementById('mainTitleInput');
+        const subTitleInput = document.getElementById('subTitleInput');
+        const qrImageInput = document.getElementById('qrImageInput');
+        const mainTitle = document.getElementById('mainTitle');
+        const subTitle = document.getElementById('subTitle');
+        const qrImage = document.getElementById('qrImage');
+        const imagePreview = document.getElementById('imagePreview');
+
+        // 默认值
+        const defaultValues = {
+            mainTitle: '扫码充电',
+            subTitle: '艾馨锦苑超级充电站 D122',
+            qrImage: 'qr_code.jpg'
+        };
+
+        // 大标题输入事件
+        mainTitleInput.addEventListener('input', function() {
+            mainTitle.textContent = this.value;
+        });
+
+        // 小标题输入事件
+        subTitleInput.addEventListener('input', function() {
+            subTitle.textContent = this.value;
+        });
+
+        // 二维码图片选择事件
+        qrImageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                // 创建预览
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="预览图片">`;
+                };
+                reader.readAsDataURL(file);
+                
+                // 更新海报中的图片
+                qrImage.src = URL.createObjectURL(file);
+            }
+        });
+
+        // 重置为默认值
+        function resetToDefault() {
+            mainTitleInput.value = defaultValues.mainTitle;
+            subTitleInput.value = defaultValues.subTitle;
+            qrImageInput.value = '';
+            
+            mainTitle.textContent = defaultValues.mainTitle;
+            subTitle.textContent = defaultValues.subTitle;
+            qrImage.src = defaultValues.qrImage;
+            
+            imagePreview.innerHTML = '选择图片后显示预览';
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 可以在这里添加其他初始化逻辑
+        });
+    </script>
+</body>
+</html>
