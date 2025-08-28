@@ -20,6 +20,11 @@
             --wave2-color: #90caf9;
             --wave3-color: #4fc3f7;
             --wave4-color: #00acc1;
+            --wave1-color-2: #bbdefb;
+            --wave2-color-2: #64b5f6;
+            --wave3-color-2: #29b6f6;
+            --wave4-color-2: #70bed3;
+            --primary-rgb: 0, 151, 167;
         }
 
         body {
@@ -231,7 +236,7 @@
             left: -12%;
             width: 124%;
             height: 360px;
-            background: linear-gradient(45deg, var(--wave1-color), #bbdefb);
+            background: linear-gradient(45deg, var(--wave1-color), var(--wave1-color-2));
             border-radius: 50% 50% 0 0;
             transform: rotate(-6deg);
         }
@@ -242,7 +247,7 @@
             left: -8%;
             width: 116%;
             height: 320px;
-            background: linear-gradient(45deg, var(--wave2-color), #64b5f6);
+            background: linear-gradient(45deg, var(--wave2-color), var(--wave2-color-2));
             border-radius: 50% 50% 0 0;
             transform: rotate(4deg);
         }
@@ -253,7 +258,7 @@
             left: -18%;
             width: 136%;
             height: 300px;
-            background: linear-gradient(45deg, var(--wave3-color), #29b6f6);
+            background: linear-gradient(45deg, var(--wave3-color), var(--wave3-color-2));
             border-radius: 50% 50% 0 0;
             transform: rotate(-3deg);
         }
@@ -264,7 +269,7 @@
             left: -10%;
             width: 120%;
             height: 400px;
-            background: linear-gradient(45deg, var(--wave4-color), #70bed3);
+            background: linear-gradient(45deg, var(--wave4-color), var(--wave4-color-2));
             border-radius: 50% 50% 0 0;
             transform: rotate(5deg);
         }
@@ -277,7 +282,7 @@
             margin-bottom: 80px;
             z-index: 3;
             position: relative;
-            text-shadow: 0 4px 20px rgba(0, 151, 167, 0.2);
+            text-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.2);
             letter-spacing: 4px;
         }
 
@@ -298,7 +303,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 
-                0 20px 60px rgba(0, 151, 167, 0.3),
+                0 20px 60px rgba(var(--primary-rgb), 0.3),
                 inset 0 0 40px rgba(255, 255, 255, 0.9);
             overflow: hidden;
         }
@@ -322,7 +327,7 @@
             background: rgba(255, 255, 255, 0.9);
             padding: 30px 50px;
             border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(0, 151, 167, 0.2);
+            box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.2);
         }
 
         .accent-dots {
@@ -561,46 +566,6 @@
                 </div>
             </div>
             
-            <div class="color-group">
-                <label for="backgroundColor" id="backgroundColorLabel">背景色</label>
-                <div class="color-input-wrapper">
-                    <input type="color" id="backgroundColor" value="#f0f8ff">
-                    <span class="color-value" id="backgroundColorValue">#f0f8ff</span>
-                </div>
-            </div>
-            
-            <div class="color-group">
-                <label for="wave1Color" id="wave1ColorLabel">波浪1</label>
-                <div class="color-input-wrapper">
-                    <input type="color" id="wave1Color" value="#e3f2fd">
-                    <span class="color-value" id="wave1ColorValue">#e3f2fd</span>
-                </div>
-            </div>
-            
-            <div class="color-group">
-                <label for="wave2Color" id="wave2ColorLabel">波浪2</label>
-                <div class="color-input-wrapper">
-                    <input type="color" id="wave2Color" value="#90caf9">
-                    <span class="color-value" id="wave2ColorValue">#90caf9</span>
-                </div>
-            </div>
-            
-            <div class="color-group">
-                <label for="wave3Color" id="wave3ColorLabel">波浪3</label>
-                <div class="color-input-wrapper">
-                    <input type="color" id="wave3Color" value="#4fc3f7">
-                    <span class="color-value" id="wave3ColorValue">#4fc3f7</span>
-                </div>
-            </div>
-            
-            <div class="color-group">
-                <label for="wave4Color" id="wave4ColorLabel">波浪4</label>
-                <div class="color-input-wrapper">
-                    <input type="color" id="wave4Color" value="#00acc1">
-                    <span class="color-value" id="wave4ColorValue">#00acc1</span>
-                </div>
-            </div>
-            
             <button class="reset-colors-btn" id="resetColorsBtn" onclick="resetColors()">重置颜色</button>
         </div>
         
@@ -677,20 +642,11 @@
 
         // 颜色选择器元素
         const primaryColorInput = document.getElementById('primaryColor');
-        const backgroundColorInput = document.getElementById('backgroundColor');
-        const wave1ColorInput = document.getElementById('wave1Color');
-        const wave2ColorInput = document.getElementById('wave2Color');
-        const wave3ColorInput = document.getElementById('wave3Color');
-        const wave4ColorInput = document.getElementById('wave4Color');
+        
 
         // 默认颜色配置
         const defaultColors = {
-            primary: '#0097a7',
-            background: '#f0f8ff',
-            wave1: '#e3f2fd',
-            wave2: '#90caf9',
-            wave3: '#4fc3f7',
-            wave4: '#00acc1'
+            primary: '#0097a7'
         };
 
         // 默认值
@@ -748,14 +704,12 @@
             
             // 更新配色选择器文本
             if (document.getElementById('colorSectionTitle')) {
-                document.getElementById('colorSectionTitle').textContent = i18n[lang].colorSectionTitle;
-                document.getElementById('primaryColorLabel').textContent = i18n[lang].primaryColorLabel;
-                document.getElementById('backgroundColorLabel').textContent = i18n[lang].backgroundColorLabel;
-                document.getElementById('wave1ColorLabel').textContent = i18n[lang].wave1ColorLabel;
-                document.getElementById('wave2ColorLabel').textContent = i18n[lang].wave2ColorLabel;
-                document.getElementById('wave3ColorLabel').textContent = i18n[lang].wave3ColorLabel;
-                document.getElementById('wave4ColorLabel').textContent = i18n[lang].wave4ColorLabel;
-                document.getElementById('resetColorsBtn').textContent = i18n[lang].resetColorsBtn;
+                const el1 = document.getElementById('colorSectionTitle');
+                if (el1) el1.textContent = i18n[lang].colorSectionTitle;
+                const el2 = document.getElementById('primaryColorLabel');
+                if (el2) el2.textContent = i18n[lang].primaryColorLabel;
+                const elReset = document.getElementById('resetColorsBtn');
+                if (elReset) elReset.textContent = i18n[lang].resetColorsBtn;
             }
             
             // 如果当前输入框为空或者是默认值，则使用新语言的默认值
@@ -821,42 +775,75 @@
             }
         });
 
-        // 颜色更新函数
+        // 工具方法：HEX <-> RGB 以及提亮
+        function hexToRgb(hex) {
+            const normalized = hex.replace('#', '');
+            const bigint = parseInt(normalized.length === 3 ? normalized.split('').map(c => c + c).join('') : normalized, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return { r, g, b };
+        }
+
+        function rgbToHex(r, g, b) {
+            const toHex = (c) => {
+                const h = c.toString(16);
+                return h.length === 1 ? '0' + h : h;
+            };
+            return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        // 与白色混合实现提亮（amount: 0~1, 越大越亮）
+        function lighten(hex, amount) {
+            const { r, g, b } = hexToRgb(hex);
+            const nr = Math.round(r + (255 - r) * amount);
+            const ng = Math.round(g + (255 - g) * amount);
+            const nb = Math.round(b + (255 - b) * amount);
+            return rgbToHex(nr, ng, nb);
+        }
+
+        function setPrimaryRgbVariable(hex) {
+            const { r, g, b } = hexToRgb(hex);
+            document.documentElement.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+        }
+
+        // 颜色更新函数（根据主色动态推导其他颜色）
         function updateColors() {
             const primaryColor = primaryColorInput.value;
-            const backgroundColor = backgroundColorInput.value;
-            const wave1Color = wave1ColorInput.value;
-            const wave2Color = wave2ColorInput.value;
-            const wave3Color = wave3ColorInput.value;
-            const wave4Color = wave4ColorInput.value;
+
+            // 推导颜色
+            const backgroundColor = lighten(primaryColor, 0.92);
+            const wave1Color = lighten(primaryColor, 0.85);
+            const wave1Color2 = lighten(primaryColor, 0.80);
+            const wave2Color = lighten(primaryColor, 0.70);
+            const wave2Color2 = lighten(primaryColor, 0.65);
+            const wave3Color = lighten(primaryColor, 0.55);
+            const wave3Color2 = lighten(primaryColor, 0.50);
+            const wave4Color = lighten(primaryColor, 0.40);
+            const wave4Color2 = lighten(primaryColor, 0.35);
 
             // 更新CSS变量
             document.documentElement.style.setProperty('--primary-color', primaryColor);
+            setPrimaryRgbVariable(primaryColor);
             document.documentElement.style.setProperty('--background-color', backgroundColor);
             document.documentElement.style.setProperty('--wave1-color', wave1Color);
+            document.documentElement.style.setProperty('--wave1-color-2', wave1Color2);
             document.documentElement.style.setProperty('--wave2-color', wave2Color);
+            document.documentElement.style.setProperty('--wave2-color-2', wave2Color2);
             document.documentElement.style.setProperty('--wave3-color', wave3Color);
+            document.documentElement.style.setProperty('--wave3-color-2', wave3Color2);
             document.documentElement.style.setProperty('--wave4-color', wave4Color);
+            document.documentElement.style.setProperty('--wave4-color-2', wave4Color2);
 
             // 更新颜色值显示
             if (document.getElementById('primaryColorValue')) {
                 document.getElementById('primaryColorValue').textContent = primaryColor;
-                document.getElementById('backgroundColorValue').textContent = backgroundColor;
-                document.getElementById('wave1ColorValue').textContent = wave1Color;
-                document.getElementById('wave2ColorValue').textContent = wave2Color;
-                document.getElementById('wave3ColorValue').textContent = wave3Color;
-                document.getElementById('wave4ColorValue').textContent = wave4Color;
             }
         }
 
         // 重置颜色
         function resetColors() {
             primaryColorInput.value = defaultColors.primary;
-            backgroundColorInput.value = defaultColors.background;
-            wave1ColorInput.value = defaultColors.wave1;
-            wave2ColorInput.value = defaultColors.wave2;
-            wave3ColorInput.value = defaultColors.wave3;
-            wave4ColorInput.value = defaultColors.wave4;
             updateColors();
         }
 
@@ -910,11 +897,12 @@
 
         // 使用html2canvas保存
         function trySaveWithHtml2Canvas(poster, saveBtn, originalText) {
+            const bg = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
             const options = {
                 scale: 2, // 提高图片质量
                 useCORS: true, // 启用跨域支持（因为现在使用base64）
                 allowTaint: true, // 允许污染画布（因为base64图片是安全的）
-                backgroundColor: '#f0f8ff', // 设置背景色
+                backgroundColor: bg, // 设置背景色
                 width: poster.offsetWidth,
                 height: poster.offsetHeight,
                 scrollX: 0,
@@ -956,9 +944,10 @@
         // 使用dom-to-image保存（备用方案）
         function trySaveWithDomToImage(poster, saveBtn, originalText) {
             if (typeof domtoimage !== 'undefined') {
+                const bg2 = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
                 domtoimage.toPng(poster, {
                     quality: 1.0,
-                    bgcolor: '#f0f8ff',
+                    bgcolor: bg2,
                     width: poster.offsetWidth * 2,
                     height: poster.offsetHeight * 2
                 }).then(function(dataUrl) {
@@ -1046,12 +1035,6 @@
             // 添加颜色选择器事件监听器
             if (primaryColorInput) {
                 primaryColorInput.addEventListener('input', updateColors);
-                backgroundColorInput.addEventListener('input', updateColors);
-                wave1ColorInput.addEventListener('input', updateColors);
-                wave2ColorInput.addEventListener('input', updateColors);
-                wave3ColorInput.addEventListener('input', updateColors);
-                wave4ColorInput.addEventListener('input', updateColors);
-                
                 // 初始化颜色显示
                 updateColors();
             }
