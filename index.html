@@ -115,15 +115,36 @@
             box-shadow: 0 0 0 3px rgba(0, 151, 167, 0.1);
         }
 
-        .input-group input[type="file"] {
-            padding: 8px;
-            border: 2px dashed #0097a7;
-            background: #f8f9fa;
-            cursor: pointer;
+        .file-input-wrapper {
+            position: relative;
+            width: 100%;
         }
 
-        .input-group input[type="file"]:hover {
+        .input-group input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 16px;
+            border: 2px dashed #0097a7;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #0097a7;
+            font-weight: 500;
+        }
+
+        .file-input-label:hover {
             background: #e3f2fd;
+            transform: translateY(-2px);
         }
 
         .preview-image {
@@ -392,7 +413,12 @@
         
         <div class="input-group">
             <label for="qrImageInput" id="qrImageLabel">二维码图片（1:1）</label>
-            <input type="file" id="qrImageInput" accept="image/*">
+            <div class="file-input-wrapper">
+                <input type="file" id="qrImageInput" accept="image/*">
+                <label for="qrImageInput" class="file-input-label" id="fileInputLabel">
+                    <span id="fileInputText">选择文件</span>
+                </label>
+            </div>
             <div class="preview-image" id="imagePreview">
                 选择图片后显示预览
             </div>
@@ -415,7 +441,9 @@
                 mainTitlePlaceholder: '请输入大标题',
                 subTitlePlaceholder: '请输入小标题',
                 imagePreviewText: '选择图片后显示预览',
-                qrCodeAlt: '二维码'
+                qrCodeAlt: '二维码',
+                fileSelectTitle: '选择图片文件',
+                fileSelectText: '选择文件'
             },
             en: {
                 mainTitle: 'Scan to Charge',
@@ -428,7 +456,9 @@
                 mainTitlePlaceholder: 'Enter main title',
                 subTitlePlaceholder: 'Enter sub title',
                 imagePreviewText: 'Select image to preview',
-                qrCodeAlt: 'QR Code'
+                qrCodeAlt: 'QR Code',
+                fileSelectTitle: 'Select image file',
+                fileSelectText: 'Choose File'
             }
         };
 
@@ -493,6 +523,10 @@
             // 更新二维码图片alt属性
             qrImage.alt = i18n[lang].qrCodeAlt;
 
+            // 更新文件选择器的文本
+            document.getElementById('fileInputText').textContent = i18n[lang].fileSelectText;
+            qrImageInput.setAttribute('title', i18n[lang].fileSelectTitle);
+            
             // 如果当前输入框为空或者是默认值，则使用新语言的默认值
             if (!mainTitleInput.value || mainTitleInput.value === defaultValues[currentLang === 'zh' ? 'en' : 'zh'].mainTitle) {
                 mainTitleInput.value = defaultValues[lang].mainTitle;
@@ -560,6 +594,9 @@
             // 设置初始默认值
             mainTitleInput.value = defaultValues.zh.mainTitle;
             subTitleInput.value = defaultValues.zh.subTitle;
+            
+            // 设置初始文件选择器文本
+            document.getElementById('fileInputText').textContent = i18n.zh.fileSelectText;
         });
     </script>
 </body>
