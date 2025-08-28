@@ -915,8 +915,12 @@
 
             // 预处理所有图片为base64
             preprocessImages().then(() => {
-                const poster = document.querySelector('.poster');
-                return withTemporaryScaleAsync(() => trySaveWithHtml2Canvas(poster, saveBtn, originalText));
+                const cleanup = [];
+                const { container, clone } = createOffscreenClone();
+                cleanup.push(() => { if (container && container.parentNode) container.parentNode.removeChild(container); });
+                return trySaveWithHtml2Canvas(clone, saveBtn, originalText).finally(() => {
+                    cleanup.forEach(fn => { try { fn(); } catch (e) {} });
+                });
             }).catch(error => {
                 console.error('图片预处理失败:', error);
                 saveBtn.textContent = originalText;
@@ -1071,6 +1075,23 @@
             // 初始化缩放逻辑
             initPreviewScaling();
         });
+        // 构建离屏克隆用于高质量导出
+        function createOffscreenClone() {
+            const original = document.querySelector('.poster');
+            const container = document.createElement('div');
+            container.style.cssText = 'position: fixed; left: -10000px; top: 0; width: 0; height: 0; overflow: hidden; z-index: -1;';
+            const clone = original.cloneNode(true);
+            // 确保无缩放影响
+            clone.style.transformOrigin = 'top left';
+            clone.style.transform = 'none';
+            // 锁定尺寸，避免布局浮动
+            clone.style.width = original.offsetWidth + 'px';
+            clone.style.height = original.offsetHeight + 'px';
+            container.appendChild(clone);
+            document.body.appendChild(container);
+            return { container, clone };
+        }
+
 
         // ============ 预览缩放与适配窗口逻辑 ============
         let currentScale = 1;
