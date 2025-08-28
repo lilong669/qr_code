@@ -36,7 +36,7 @@
             align-items: flex-start;
             padding: 40px;
             gap: 40px;
-            overflow: hidden;
+            overflow: hidden; /* 防止整体滚动，但允许固定工具栏 */
         }
 
         .poster {
@@ -76,7 +76,7 @@
             border: 1px solid rgba(0,0,0,0.08);
             box-shadow: 0 10px 30px rgba(0,0,0,0.12);
             border-radius: 14px;
-            z-index: 1001;
+            z-index: 10000;
         }
 
         .ft-btn {
