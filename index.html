@@ -208,6 +208,18 @@
             font-family: inherit;
         }
 
+        .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #fff;
+            appearance: none;
+        }
+
         .input-group input:focus {
             outline: none;
             border-color: var(--primary-color);
@@ -616,6 +628,19 @@
             <button class="lang-btn" data-lang="en">English</button>
         </div>
         
+        <div class="input-group">
+            <label for="posterSizeSelect" id="posterSizeLabel">海报尺寸</label>
+            <select id="posterSizeSelect">
+                <option value="A6">A6</option>
+                <option value="A5">A5</option>
+                <option value="A4" selected>A4</option>
+                <option value="A3">A3</option>
+                <option value="A2">A2</option>
+                <option value="A1">A1</option>
+                <option value="A0">A0</option>
+            </select>
+        </div>
+        
         
         
         <div class="input-group">
@@ -684,6 +709,14 @@
                 mainTitle: '扫码充电',
                 subTitle: 'XXXX超级充电站 A001',
                 controlPanelTitle: '控制面板',
+                posterSizeLabel: '海报尺寸',
+                sizeA0: 'A0',
+                sizeA1: 'A1',
+                sizeA2: 'A2',
+                sizeA3: 'A3',
+                sizeA4: 'A4',
+                sizeA5: 'A5',
+                sizeA6: 'A6',
                 mainTitleLabel: '大标题',
                 subTitleLabel: '小标题',
                 qrImageLabel: '二维码图片（1:1）',
@@ -710,6 +743,14 @@
                 mainTitle: 'Scan to Charge',
                 subTitle: 'XXXX Super Charging Station A001',
                 controlPanelTitle: 'Control Panel',
+                posterSizeLabel: 'Poster Size',
+                sizeA0: 'A0',
+                sizeA1: 'A1',
+                sizeA2: 'A2',
+                sizeA3: 'A3',
+                sizeA4: 'A4',
+                sizeA5: 'A5',
+                sizeA6: 'A6',
                 mainTitleLabel: 'Main Title',
                 subTitleLabel: 'Sub Title',
                 qrImageLabel: 'QR Code Image (1:1)',
@@ -749,6 +790,7 @@
         const posterEl = document.querySelector('.poster');
         const posterWrapperEl = document.querySelector('.poster-scale-wrapper');
         const controlPanelEl = document.querySelector('.control-panel');
+        const posterSizeSelect = document.getElementById('posterSizeSelect');
         const fitToggleEl = document.getElementById('fitToggle');
         const zoomRangeEl = document.getElementById('zoomRange');
         const zoomValueEl = document.getElementById('zoomValue');
@@ -766,6 +808,20 @@
         // 默认颜色配置
         const defaultColors = {
             primary: '#0097a7'
+        };
+
+        // 基准尺寸与A系纸张缩放（以当前设计为A4）
+        let basePosterWidth = 800;   // 初始化时将被真实DOM覆盖
+        let basePosterHeight = 1132; // 初始化时将被真实DOM覆盖
+        let designScale = 1;         // 选定纸张相对A4的缩放
+        const sizePresets = {
+            A6: 1 / 2,
+            A5: 1 / Math.SQRT2,
+            A4: 1,
+            A3: Math.SQRT2,
+            A2: 2,
+            A1: 2 * Math.SQRT2,
+            A0: 4
         };
 
         // 默认值
@@ -799,6 +855,24 @@
 
             // 更新控制面板文本
             document.getElementById('controlPanelTitle').textContent = i18n[lang].controlPanelTitle;
+            const posterSizeLabel = document.getElementById('posterSizeLabel');
+            if (posterSizeLabel) posterSizeLabel.textContent = i18n[lang].posterSizeLabel;
+            if (posterSizeSelect) {
+                const sizeLabelMap = {
+                    A0: i18n[lang].sizeA0,
+                    A1: i18n[lang].sizeA1,
+                    A2: i18n[lang].sizeA2,
+                    A3: i18n[lang].sizeA3,
+                    A4: i18n[lang].sizeA4,
+                    A5: i18n[lang].sizeA5,
+                    A6: i18n[lang].sizeA6
+                };
+                Array.from(posterSizeSelect.options).forEach(opt => {
+                    if (sizeLabelMap[opt.value]) {
+                        opt.textContent = sizeLabelMap[opt.value];
+                    }
+                });
+            }
             document.getElementById('mainTitleLabel').textContent = i18n[lang].mainTitleLabel;
             document.getElementById('subTitleLabel').textContent = i18n[lang].subTitleLabel;
             document.getElementById('qrImageLabel').textContent = i18n[lang].qrImageLabel;
@@ -1035,7 +1109,7 @@
             return new Promise((resolve) => {
                 const bg = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#ffffff';
                 const options = {
-                    scale: 2,
+                    scale: 2 * (typeof designScale === 'number' ? designScale : 1),
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: bg,
@@ -1080,8 +1154,8 @@
                     domtoimage.toPng(poster, {
                         quality: 1.0,
                         bgcolor: bg2,
-                        width: poster.offsetWidth * 2,
-                        height: poster.offsetHeight * 2
+                        width: poster.offsetWidth * 2 * (typeof designScale === 'number' ? designScale : 1),
+                        height: poster.offsetHeight * 2 * (typeof designScale === 'number' ? designScale : 1)
                     }).then(function(dataUrl) {
                         const link = document.createElement('a');
                         link.download = `poster_${currentLang === 'zh' ? '中文' : 'English'}_${new Date().getTime()}.png`;
@@ -1162,6 +1236,11 @@
             // 设置初始默认值
             mainTitleInput.value = defaultValues.zh.mainTitle;
             subTitleInput.value = defaultValues.zh.subTitle;
+            // 初始化基准尺寸
+            if (posterEl) {
+                basePosterWidth = posterEl.offsetWidth;
+                basePosterHeight = posterEl.offsetHeight;
+            }
             
             // 设置初始文件选择器文本
             document.getElementById('fileInputText').textContent = i18n.zh.fileSelectText;
@@ -1177,6 +1256,23 @@
             initPreviewScaling();
             // 绑定悬浮工具栏
             bindFloatingToolbar();
+            // 绑定尺寸选择
+            const sizeSelect = document.getElementById('posterSizeSelect');
+            if (sizeSelect) {
+                sizeSelect.addEventListener('change', function() {
+                    const key = this.value || 'A4';
+                    designScale = sizePresets[key] || 1;
+                    if (isFitMode) {
+                        applyScale(computeFitScale());
+                    } else {
+                        applyScale(lastManualScale || 1);
+                    }
+                });
+                // 初始应用当前尺寸
+                const initKey = sizeSelect.value || 'A4';
+                designScale = sizePresets[initKey] || 1;
+                applyScale(computeFitScale());
+            }
         });
         // 构建离屏克隆用于高质量导出
         function createOffscreenClone() {
@@ -1205,9 +1301,9 @@
             currentScale = scale;
             if (posterEl && posterWrapperEl) {
                 posterEl.style.transformOrigin = 'top left';
-                posterEl.style.transform = `scale(${scale})`;
-                posterWrapperEl.style.width = `${Math.round(posterEl.offsetWidth * scale)}px`;
-                posterWrapperEl.style.height = `${Math.round(posterEl.offsetHeight * scale)}px`;
+                posterEl.style.transform = `scale(${scale * designScale})`;
+                posterWrapperEl.style.width = `${Math.round(basePosterWidth * scale * designScale)}px`;
+                posterWrapperEl.style.height = `${Math.round(basePosterHeight * scale * designScale)}px`;
             }
             if (zoomValueEl) {
                 zoomValueEl.textContent = `${Math.round(scale * 100)}%`;
@@ -1227,8 +1323,8 @@
             const paddingTop = parseInt(bodyStyles.paddingTop || '0', 10) || 0;
             const paddingBottom = parseInt(bodyStyles.paddingBottom || '0', 10) || 0;
 
-            const posterWidth = posterEl.offsetWidth;
-            const posterHeight = posterEl.offsetHeight;
+            const posterWidth = basePosterWidth * designScale;
+            const posterHeight = basePosterHeight * designScale;
 
             let availWidth;
             let availHeight;
